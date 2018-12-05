@@ -64,7 +64,10 @@ class Default(protocol.RSEProtocol):
             :raises RSEAccessDenied: if no connection could be established.
         """
         try:
+            self.rse['credentials'] = {}
             self.rse['credentials']['host'] = self.attributes['hostname']
+            self.rse['credentials']['username'] = 'user'
+            self.rse['credentials']['password'] = 'password'
             self.__connection = pysftp.Connection(**self.rse['credentials'])
         except Exception as e:
             raise exception.RSEAccessDenied(e)
@@ -88,11 +91,13 @@ class Default(protocol.RSEProtocol):
         try:
             self.__connection.get(self.pfn2path(pfn), dest)
         except IOError as e:
+            print(e)
             try:  # To check if the error happend local or remote
                 with open(dest, 'wb'):
                     pass
                 call(['rm', dest])
             except IOError as e:
+                print(dest)
                 if e.errno == 2:
                     raise exception.DestinationNotAccessible(e)
                 else:
@@ -120,10 +125,11 @@ class Default(protocol.RSEProtocol):
         else:
             sf = source
         try:
+            print('put')
             self.__connection.put(sf, self.pfn2path(target))
         except IOError as e:
             try:
-                self.__connection.execute('mkdir -p %s' % '/'.join(self.pfn2path(target).split('/')[0:-1]))
+                self.__connection.execute('mkdir -p "%s"' % '/'.join(self.pfn2path(target).split('/')[0:-1]))
                 self.__connection.put(sf, self.pfn2path(target))
             except Exception as e:
                 raise exception.DestinationNotAccessible(e)
@@ -178,7 +184,7 @@ class Default(protocol.RSEProtocol):
 
     def pfn2path(self, pfn):
         tmp = list(self.parse_pfns(pfn).values())[0]
-        return '/'.join([tmp['prefix'], tmp['path'], tmp['name']])
+        return '/'.join([tmp['prefix'], tmp['path'], tmp['name']])[1:]
 
     def stat(self, pfn):
         """ Determines the file size in bytes  of the provided file.

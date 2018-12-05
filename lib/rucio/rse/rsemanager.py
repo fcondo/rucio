@@ -408,14 +408,17 @@ def upload(rse_settings, lfns, source_dir=None, force_pfn=None, force_scheme=Non
             else:
                 if protocol.exists('%s.rucio.upload' % pfn):  # Check for left over of previous unsuccessful attempts
                     try:
+                        print('delete left over')
                         protocol_delete.delete('%s.rucio.upload' % list(protocol_delete.lfns2pfns(make_valid_did(lfn)).values())[0])
                     except Exception as e:
                         ret['%s:%s' % (scope, name)] = exception.RSEOperationNotSupported('Unable to remove temporary file %s.rucio.upload: %s' % (pfn, str(e)))
                         gs = False
                         continue
                 try:  # Try uploading file
+                    print('try upload')
                     protocol.put(base_name, '%s.rucio.upload' % pfn, source_dir, transfer_timeout=transfer_timeout)
                 except Exception as e:
+                    print(3)
                     gs = False
                     ret['%s:%s' % (scope, name)] = e
                     continue
@@ -423,6 +426,7 @@ def upload(rse_settings, lfns, source_dir=None, force_pfn=None, force_scheme=Non
                 valid = None
                 try:  # Get metadata of file to verify if upload was successful
                     try:
+                        print('verfiy')
                         stats = protocol.stat('%s.rucio.upload' % pfn)
                         if ('adler32' in stats) and ('adler32' in lfn):
                             valid = stats['adler32'] == lfn['adler32']
@@ -683,7 +687,6 @@ def find_matching_scheme(rse_settings_dest, rse_settings_src, operation_src, ope
             tbr.append(protocol)
     for r in tbr:
         dest_candidates.remove(r)
-
     if not len(src_candidates) or not len(dest_candidates):
         raise exception.RSEProtocolNotSupported('No protocol for provided settings found : %s.' % str(rse_settings_dest))
 

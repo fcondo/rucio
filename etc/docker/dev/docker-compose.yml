@@ -7,10 +7,13 @@ services:
     links:
       - mysql:mysql
       - graphite:graphite
+      - sftp_1:sftp_1
+      - sftp_2:sftp_2
     volumes:
       - ../../../tools:/opt/rucio/tools
       - ../../../bin:/opt/rucio/bin
       - ../../../lib:/opt/rucio/lib
+      - /root/.ssh:/root/.ssh
   mysql:
     image: mysql/mysql-server:5.7
     environment:
@@ -21,3 +24,13 @@ services:
     image: graphiteapp/graphite-statsd
     ports:
       - "80:80"
+  sftp_1:
+    image: atmoz/sftp
+    command: user:password:::bla
+    volumes:
+      - /root/.ssh/id_rsa.pub:/home/user/.ssh/keys/id_rse.pub
+  sftp_2:
+    image: atmoz/sftp
+    command: user:password:::bla
+    volumes:
+      - /root/.ssh/id_rsa.pub:/home/user/.ssh/keys/id_rse.pub

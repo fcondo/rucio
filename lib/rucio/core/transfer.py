@@ -63,7 +63,7 @@ def submit_bulk_transfers(external_host, files, transfertool='fts3', job_params=
     record_counter('core.request.submit_transfer')
 
     transfer_id = None
-
+    print(transfertool)
     if transfertool == 'fts3':
         start_time = time.time()
         job_files = []
@@ -86,6 +86,12 @@ def submit_bulk_transfers(external_host, files, transfertool='fts3', job_params=
             # if no valid USER TRANSFER cases --> go with std submission
             transfer_id = FTS3Transfertool(external_host=external_host).submit(files=job_files, job_params=job_params, timeout=timeout)
         record_timer('core.request.submit_transfers_fts3', (time.time() - start_time) * 1000 / len(files))
+    else:
+        import importlib
+        module = importlib.import_module('rucio.transfertool.%s' % transfertool)
+        transfer_tool = module.Transfertool(external_host=external_host)
+        transfer_id = transfer_tool.submit(files=files, job_params=job_params, timeout=timeout)
+
     return transfer_id
 
 
@@ -221,8 +227,10 @@ def bulk_query_transfers(request_host, transfer_ids, transfertool='fts3', timeou
                         fts_resps[transfer_id][request_id]['new_state'] = RequestState.DONE
         return fts_resps
     else:
-        raise NotImplementedError
-
+        import importlib
+        module = importlib.import_module('rucio.transfertool.%s' % transfertool)
+        transfer_tool = module.Transfertool(external_host=request_host)
+        return transfer_tool.bulk_query(transfer_ids=transfer_ids, timeout=timeout)
     return None
 
 
@@ -571,13 +579,23 @@ def get_transfer_requests_and_source_replicas(total_workers=0, worker_number=0, 
                     transfer_dst_type = "TAPE"
 
                 # get external_host
-                fts_hosts = rse_attrs[dest_rse_id].get('fts', None)
-                if not fts_hosts:
-                    logging.error('Destination RSE %s FTS attribute not defined - SKIP REQUEST %s' % (dest_rse, req_id))
-                    continue
+                external_hosts = config_get('conveyor', 'external_hosts')
+                fts_list = []
+                if external_hosts:
+                    if ',' in external_hosts:
+                        fts_list = external_hosts.split(',')
+                    else:
+                        fts_list = [external_hosts]
+                else:
+                    fts_hosts = rse_attrs[dest_rse_id].get('fts', None)
+                    if not fts_hosts:
+                        logging.error('Destination RSE %s FTS attribute not defined - SKIP REQUEST %s' % (dest_rse, req_id))
+                        continue
+                    else:
+                        fts_list = fts_hosts.split(",")
+
                 if retry_count is None:
                     retry_count = 0
-                fts_list = fts_hosts.split(",")
 
                 verify_checksum = 'both'
                 if not rse_attrs[dest_rse_id].get('verify_checksum', True):

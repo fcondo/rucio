@@ -230,7 +230,7 @@ def poll_transfers(external_host, xfers, prepend_str='', request_ids=None, timeo
         try:
             tss = time.time()
             logging.info(prepend_str + 'Polling %i transfers against %s with timeout %s' % (len(xfers), external_host, timeout))
-            resps = transfer_core.bulk_query_transfers(external_host, xfers, 'fts3', timeout)
+            resps = transfer_core.bulk_query_transfers(external_host, xfers, config_get('conveyor', 'transfertool'), timeout)
             record_timer('daemons.conveyor.poller.bulk_query_transfers', (time.time() - tss) * 1000 / len(xfers))
         except TransferToolTimeout as error:
             logging.error(prepend_str + str(error))
@@ -260,6 +260,7 @@ def poll_transfers(external_host, xfers, prepend_str='', request_ids=None, timeo
         tss = time.time()
         logging.debug(prepend_str + 'Updating %s transfer requests status' % (len(xfers)))
         cnt = 0
+        logging.debug(resps)
         for transfer_id in resps:
             try:
                 transf_resp = resps[transfer_id]

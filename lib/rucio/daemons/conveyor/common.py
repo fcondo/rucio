@@ -98,7 +98,7 @@ def submit_transfer(external_host, job, submitter='submitter', logging_prepend_s
         logging.info(prepend_str + 'About to submit job to %s with timeout %s' % (external_host, timeout))
         eid = transfer_core.submit_bulk_transfers(external_host,
                                                   files=job['files'],
-                                                  transfertool='fts3',
+                                                  transfertool=config_get('conveyor', 'transfertool'),
                                                   job_params=job['job_params'],
                                                   timeout=timeout,
                                                   user_transfer_job=user_transfer_job)
@@ -196,7 +196,6 @@ def bulk_group_transfer(transfers, policy='rule', group_bulk=200, fts_source_str
         external_host = transfer['external_host']
         scope = file['metadata']['scope']
         activity = file['activity']
-
         if external_host not in grouped_transfers:
             grouped_transfers[external_host] = {}
             if USER_TRANSFERS not in ['cms'] or activity not in USER_ACTIVITY:

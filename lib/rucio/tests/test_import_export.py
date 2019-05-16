@@ -384,7 +384,7 @@ class TestExporter(object):
         rses = sanitised
 
         assert_equal(r2.status, 200)
-        assert_equal(r2.body, render_json(**{'rses': rses, 'distances': export_distances()}))
+        assert_equal(parse_response(r2.body), parse_response(render_json(**{'rses': rses, 'distances': export_distances()})))
 
 
 class TestExportImport(object):

@@ -741,6 +741,16 @@ class AccountLimit(BASE, ModelBase):
                    ForeignKeyConstraint(['rse_id'], ['rses.id'], name='ACCOUNT_LIMITS_RSE_ID_FK'),)
 
 
+class AccountGlobalLimit(BASE, ModelBase):
+    """Represents account limits"""
+    __tablename__ = 'account_glob_limits'
+    account = Column(InternalAccountString(25))
+    rse_expression = Column(String(3000))
+    bytes = Column(BigInteger)
+    _table_args = (PrimaryKeyConstraint('account', 'rse_expression', name='ACCOUNT_GLOBAL_LIMITS_PK'),
+                   ForeignKeyConstraint(['account'], ['accounts.account'], name='GLOBAL_LIMITS_ACCOUNT_FK'),)
+
+
 class AccountUsage(BASE, ModelBase, Versioned):
     """Represents account usage"""
     __tablename__ = 'account_usage'
@@ -1259,6 +1269,7 @@ def register_models(engine):
     models = (Account,
               AccountAttrAssociation,
               AccountLimit,
+              AccountGlobalLimit,
               AccountUsage,
               AlembicVersion,
               BadReplicas,
@@ -1315,6 +1326,7 @@ def unregister_models(engine):
     models = (Account,
               AccountAttrAssociation,
               AccountLimit,
+              AccountGlobalLimit,
               AccountUsage,
               AlembicVersion,
               BadReplicas,

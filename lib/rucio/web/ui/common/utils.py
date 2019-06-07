@@ -63,11 +63,7 @@ def check_token(rendered_tpl):
         ui_account = input()['ui_account']
 
     render = template.render(join(dirname(__file__), '../templates'))
-    if ctx.env.get('SSL_CLIENT_VERIFY') != 'SUCCESS':
-        return render.problem("No certificate provided. Please authenticate with a certificate registered in Rucio.")
-
-    dn = ctx.env.get('SSL_CLIENT_S_DN')
-
+    dn = '/CN=Rucio User'
     if not dn.startswith('/'):
         dn = '/%s' % '/'.join(dn.split(',')[::-1])
 

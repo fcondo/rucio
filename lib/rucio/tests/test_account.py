@@ -26,7 +26,7 @@ from rucio.client.accountclient import AccountClient
 from rucio.common.config import config_get
 from rucio.common.exception import AccountNotFound, Duplicate, InvalidObject
 from rucio.common.utils import generate_uuid as uuid
-from rucio.core.account import list_identities
+from rucio.core.account import list_identities, add_account_attribute, list_account_attributes
 from rucio.core.identity import add_account_identity, add_identity
 from rucio.db.sqla.constants import AccountStatus, IdentityType
 from rucio.tests.common import account_name_generator
@@ -68,6 +68,16 @@ class TestAccountCoreApi():
         add_account_identity(identity, identity_type, account, email, password='secret')
         identities = list_identities(account)
         assert_in({'type': identity_type, 'identity': identity, 'email': email}, identities)
+
+    def test_add_account_attribute(self):
+        """ ACCOUNT (CORE): Test adding attribute to account """
+        account = 'root'
+        key = account_name_generator()
+        value = True
+        add_account_attribute(account, key, value)
+        assert_in({'key': key, 'value': True}, list_account_attributes(account))
+        with assert_raises(Duplicate):
+            add_account_attribute(account, key, value)
 
 
 class TestAccountRestApi():

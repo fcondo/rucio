@@ -136,7 +136,7 @@ def create_root_account():
 
     account = models.Account(account='root', account_type=AccountType.SERVICE, status=AccountStatus.ACTIVE)
 
-    identity1 = models.Identity(identity=up_id, identity_type=IdentityType.USERPASS, password=up_pwd, salt='0', email=up_email)
+    identity1 = models.Identity(identity=up_id, identity_type=IdentityType.USERPASS, password=up_pwd, salt='0'.encode(), email=up_email)
     iaa1 = models.IdentityAccountAssociation(identity=identity1.identity, identity_type=identity1.identity_type, account=account.account, is_default=True)
 
     # X509 authentication

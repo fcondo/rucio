@@ -31,6 +31,7 @@ import random
 import sys
 
 import paramiko
+import six
 
 from dogpile.cache import make_region
 from dogpile.cache.api import NO_VALUE
@@ -103,7 +104,14 @@ def get_auth_token_user_pass(account, username, password, appid, ip=None, sessio
 
     db_salt = result['salt']
     db_password = result['password']
-    if db_password != hashlib.sha256('%s%s' % (db_salt, password)).hexdigest():
+
+    if six.PY3:
+        db_salt = db_salt.decode()
+        salted_password = ('%s%s' % (db_salt, password)).encode()
+    else:
+        salted_password = '%s%s' % (db_salt, password)
+
+    if db_password != hashlib.sha256(salted_password).hexdigest():
         return None
 
     # get account identifier

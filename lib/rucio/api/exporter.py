@@ -37,7 +37,7 @@ def export_data(issuer):
         rses[get_rse_name(rse_id=rse_id)] = rse
     data['rses'] = rses
 
-	try:
+    try:
         for src_id in data['distances']:
 	        dests = data['distances'][src_id]
 		    src = get_rse_name(rse_id=src_id)

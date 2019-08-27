@@ -17,6 +17,7 @@ from rucio.common import exception
 from rucio.core import exporter
 from rucio.core.rse import get_rse_name
 
+import sys
 
 def export_data(issuer):
     """
@@ -47,9 +48,10 @@ def export_data(issuer):
                 distances[src][dest] = dests[dest_id]
         data['distances'] = distances
     except ValueError:
-        print 'src: ' + src
-        print 'dest: ' + dest
-        print 'distances[src][dest]: ' + dests[dest_id]
+        sys.stderr.write('src: ' + str(src))
+        sys.stderr.write('dest: ' + str(dest))
+        sys.stderr.write('distances[src][dest]: ' + str(dests[dest_id]))
+        sys.stderr.write('data[distances]: ' + str(data['distances']))
    
     finally:
         return data
